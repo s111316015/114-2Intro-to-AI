@@ -3,15 +3,307 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的第一個網頁</title>
+    <title>期末作業：Google Word2Vec 演算法專題報告</title>
+    <style>
+        /* 全域樣式設定 */
+        :root {
+            --primary-color: #1e3a8a; /* 深科技藍 */
+            --secondary-color: #0d9488; /* 藍綠色 */
+            --bg-color: #f8fafc; /* 淺灰底色 */
+            --text-color: #334155; /* 深灰文字 */
+            --card-bg: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.7;
+            padding-bottom: 60px;
+        }
+
+        /* 頂部頁首 */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .student-info {
+            margin-top: 20px;
+            font-size: 0.95rem;
+            background: rgba(255, 255, 255, 0.1);
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 20px;
+        }
+
+        /* 區塊容器 */
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        section {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--secondary-color);
+            padding-left: 15px;
+        }
+
+        h3 {
+            color: #1e293b;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        /* 列表樣式 */
+        ul, ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* 表格樣式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            border: 1px solid #e2e8f0;
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        /* 區塊強調卡片（如對話紀錄、公式） */
+        .highlight-box {
+            background-color: #f0fdf4;
+            border-left: 4px solid #16a34a;
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+        }
+
+        .formula-box {
+            background-color: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            padding: 15px;
+            text-align: center;
+            font-family: "Courier New", Courier, monospace;
+            font-weight: bold;
+            margin: 15px 0;
+            border-radius: 6px;
+        }
+
+        /* 網格佈局（應用案例用） */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .grid-item {
+            background-color: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .grid-item h4 {
+            color: var(--secondary-color);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        /* 頁尾 */
+        footer {
+            text-align: center;
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 60px;
+        }
+    </style>
 </head>
 <body>
 
-    <h1>歡迎來到我的網頁！</h1>
-    <p>這是一個使用基礎 HTML 語法建立的段落。你可以在這裡輸入任何你想寫的文字。</p>
+    <header>
+        <h1>人工智慧導論：期末專題報告</h1>
+        <p>探索 Google Word2Vec 演算法之原理與應用</p>
+        <div class="student-info">
+            班級：資二甲 | 學號：111316015 | 姓名：王怡停
+        </div>
+    </header>
 
-    <!-- 這是一段註解，瀏覽器不會把它顯示出來 -->
-    <a href="https://www.google.com" target="_blank">點擊這裡前往 Google</a>
+    <div class="container">
+
+        <section id="algorithm">
+            <h2>一、演算法核心理解</h2>
+            <p><strong>Word2Vec</strong> 是 Google 於 2013 年提出的一種用於產生「詞向量（Word Embedding）」的高效技術。它的核心思想是<strong>「利用上下文來預測字詞」</strong>，將文字從傳統高維稀疏的 One-hot 向量，轉換為低維稠密的連續向量，從而讓計算機能夠理解字詞之間的語意相似度。</p>
+            
+            <h3>1. 兩大訓練架構：CBOW 與 Skip-gram</h3>
+            <p>Word2Vec 主要包含兩種神經網路架構，兩者的預測邏輯正好相反：</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>架構名稱</th>
+                        <th>核心機制 (如何運作)</th>
+                        <th>優缺點與適用場景</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>CBOW</strong><br>(Continuous Bag of Words)</td>
+                        <td>透過「上下文」的詞彙，來預測中間出現的「中心詞」。例如給定 [機器, 學習, 核心]，預測中間的 [演算法]。</td>
+                        <td>訓練速度較快。在處理高頻率出現的字詞時，準確度較高，適合資料量較小的場景。</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Skip-gram</strong></td>
+                        <td>透過一個「中心詞」，去預測它前後可能出現的「上下文」。例如給定 [演算法]，預測前後可能出現 [機器]、[學習]。</td>
+                        <td>訓練速度較慢。但在處理「罕見詞」或大型語料庫時，能夠捕捉到更好的語意關聯性。</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>2. 數學原理簡述</h3>
+            <p>Word2Vec 本質上是一個只有單個隱藏層（Hidden Layer）的淺層神經網路。其目標是最大化條件機率的對數似然函數。以 Skip-gram 為例，其核心優化目標公式為：</p>
+            <div class="formula-box">
+                L = ∑_{t=1}^{T} ∑_{-c ≤ j ≤ c, j ≠ 0} log P(w_{t+j} | w_t)
+            </div>
+            <p>透過反向傳播（Backpropagation）與梯度下降，模型會不斷調整隱藏層的權重矩陣，而這個矩陣最終就是我們所需要的詞向量表。利用餘弦相似度（Cosine Similarity），我們就能計算出「國王 - 男人 + 女人 = 女皇」這類經典的語意運作。</p>
+        </section>
+
+        <section id="ai-cooperation">
+            <h2>二、AI 輔助學習紀錄</h2>
+            <p>在本次期末專題的研讀過程中，我積極將 AI 工具（如 ChatGPT / Claude）定位為「私人助教」，以下是我的協作與思維碰撞流程：</p>
+            
+            <div class="highlight-box">
+                <strong>💡 提問與協作歷程範例：</strong>
+                <ol>
+                    <li><strong>第一階段（概念破冰）：</strong> 我向 AI 提問：<em>「請用一個小學生能聽懂的比喻，解釋什麼是 Word2Vec 的詞向量？」</em> AI 回應：這就像在班級座位表上，興趣相似的小朋友會坐得比較近，喜歡打球的坐一區，喜歡看書的坐一區，Word2Vec 就是在幫字詞安排座位的工具。這幫助我快速建立了直觀理解。</li>
+                    <li><strong>第二階段（技術深化）：</strong> 當我閱讀論文卡在損失函數時，我請 AI：<em>「請一步步推導 Skip-gram 的 Softmax 函數，並說明為什麼它在大數據下計算很慢？」</em> AI 不僅提供公式，還引導我認識了「負採樣（Negative Sampling）」的優化機制。</li>
+                </ol>
+            </div>
+            <p><strong>反思：</strong> AI 极大地缩短了我查找資料的時間，並能針對我的盲點進行即時解答。然而，這也讓我意識到，如何精準地「提問（Prompt）」是未來工程師非常核心的技能。</p>
+        </section>
+
+        <section id="verification">
+            <h2>三、資訊查證與錯誤修正</h2>
+            <p>雖然 AI 工具提供了非常豐富的內容，但本著不盲目迷信工具的科學精神，我將 AI 給出的資訊與 Google 的原始論文及學術文獻進行了交叉對比，發現並修正了以下幾處「AI 幻覺」或不夠精確的內容：</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>查核項目</th>
+                        <th>AI 最初提供的資訊</th>
+                        <th>經查證後的正確資訊 (與修正說明)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>模型深度</strong></td>
+                        <td>AI 稱 Word2Vec 是一個「深度學習」經典模型。</td>
+                        <td><strong>修正：</strong> 查閱原始論文，Word2Vec 故意設計為僅包含一個隱藏層的<strong>「淺層神經網路」</strong>，目的是為了降低計算複雜度以處理海量文本。</td>
+                    </tr>
+                    <tr>
+                        <td><strong>同音異義詞限制</strong></td>
+                        <td>AI 在回答應用時，暗示 Word2Vec 可以完美區分所有語境中的多義詞。</td>
+                        <td><strong>修正：</strong> 查證發現 Word2Vec 是靜態詞向量（每個詞只有固定一組向量），無法解決一詞多義（如「蘋果」可以是手機或水果）。這直到後來的 BERT 模型才被解決。</td>
+                    </tr>
+                    <tr>
+                        <td><strong>發表年份與作者</strong></td>
+                        <td>AI 在某次回答中模糊地說是 Google 團隊在 2015 年普及。</td>
+                        <td><strong>修正：</strong> 精確查證確認為 Tomas Mikolov 等人於 <strong>2013 年</strong> 發表於 arXiv 的論文。</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="applications">
+            <h2>四、視覺化與實際應用案例</h2>
+            <p>Word2Vec 的出現，徹底改變了自然語言處理（NLP）的發展軌跡，它被廣泛應用於以下現實世界的技術場景中：</p>
+            
+            <div class="grid">
+                <div class="grid-item">
+                    <h4>1. 智慧搜尋引擎</h4>
+                    <p>當用戶搜尋「購買便宜機票」時，系統能透過詞向量理解「便宜」與「廉價」、「機票」與「航班」的相近性，即使字面不完全匹配，也能精準找出相關網頁。</p>
+                </div>
+                <div class="grid-item">
+                    <h4>2. 電商推薦系統</h4>
+                    <p>不僅可以對文字建模，還能將「商品ID」視為單字，把「用戶的瀏覽序列」視為句子。利用 Word2Vec 訓練出商品向量，進而推薦與用戶歷史瀏覽極為相似的商品（Item2Vec）。</p>
+                </div>
+                <div class="grid-item">
+                    <h4>3. 情感分析與社群監測</h4>
+                    <p>將社群媒體上的評論轉換為向量後，輸入給分類器，自動判斷消費者對某個品牌的輿情是偏向「正評」還是「負評」，自動化程度大幅提升。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="reflection">
+            <h2>五、持續學習與個人反思</h2>
+            <p>這次的期末專題報告不僅是一次技術的實踐，更是一次學習方法論的升級。以下是我的三點深刻反思：</p>
+            <ul>
+                <li><strong>對技術演進的敬畏：</strong> 雖然 Word2Vec 在今天看來已經被 Transformer、BERT 或 GPT-4 等大語言模型所超越，但深入研究它後，我才明白當初它如何精妙地解決了運算資源與語意表達的矛盾。沒有 Word2Vec 奠定的 Embedding 基礎，就沒有今天的大模型時代。</li>
+                <li><strong>人機協作的批判性思維：</strong> 在與 AI 工具相處的過程中，我體會到「盡信書不如無書」。AI 可以做為強大的效率放大器，但人類的「資訊查證」與「邏輯重組」能力才是報告具有學術價值的關鍵。</li>
+                <li><strong>未來的延伸學習：</strong> 接下來，我計畫利用 Python 的 `Gensim` 套件，親自下載維基百科的中文語料庫來訓練一個專屬的 Word2Vec 模型，將理論真正轉化為動手實作的能力。</li>
+            </ul>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>&copy; 2026 人工智慧導論期末報告. Made with Markdown & HTML/CSS.</p>
+    </footer>
 
 </body>
 </html>
