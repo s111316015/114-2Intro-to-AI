@@ -3,177 +3,386 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word2Vec 2D 詞向量互動視覺化</title>
+    <title>Word2Vec: Efficient Estimation of Word Representations in Vector Space</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --primary: #1e3a8a;
+            --slate-700: #334155;
+            --slate-600: #475569;
+            --slate-100: #f1f5f9;
+            --teal-600: #0d9488;
+            --indigo-600: #4f46e5;
+            --rose-600: #e11d48;
             --bg: #f8fafc;
             --card: #ffffff;
-            --text: #334155;
+            --border: #e2e8f0;
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg);
-            color: var(--text);
+            color: var(--slate-700);
             margin: 0;
-            padding: 20px;
+            padding: 24px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
         .container {
-            max-width: 1000px;
+            max-width: 1350px;
             width: 100%;
             background: var(--card);
-            padding: 30px;
+            padding: 35px;
             border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            box-sizing: border-box;
         }
-        h1 {
-            color: var(--primary);
-            margin-bottom: 10px;
-            font-size: 1.8rem;
-            text-align: center;
-        }
-        p.desc {
-            text-align: center;
-            color: #64748b;
+        header {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
             margin-bottom: 25px;
         }
-        .control-panel {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-            background: #f1f5f9;
-            padding: 15px;
-            border-radius: 8px;
+        h1 {
+            color: var(--slate-700);
+            margin: 0 0 8px 0;
+            font-size: 1.8rem;
+            font-family: Georgia, serif;
         }
-        .control-panel input[type="text"] {
-            padding: 8px 12px;
+        .author-meta {
+            font-size: 0.9rem;
+            color: var(--slate-600);
+            line-height: 1.5;
+        }
+
+        /* 控制面板 */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.4fr 0.9fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .panel {
+            background: #ffffff;
+            padding: 18px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        .panel h4 {
+            margin: 0 0 12px 0;
+            color: var(--slate-600);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        select, input[type="text"] {
+            width: 100%;
+            padding: 9px 12px;
             border: 1px solid #cbd5e1;
             border-radius: 6px;
-            outline: none;
+            font-size: 0.9rem;
+            color: var(--slate-700);
+            background-color: #fff;
+            box-sizing: border-box;
         }
-        .control-panel button {
-            background-color: var(--primary);
+        .algebra-flex {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .math-sign {
+            font-family: "Courier New", monospace;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        button {
+            width: 100%;
+            background-color: var(--slate-600);
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 10px;
             border-radius: 6px;
             cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
             transition: background 0.2s;
         }
-        .control-panel button:hover {
-            background-color: #2563eb;
+        button:hover {
+            background-color: var(--slate-700);
         }
+
+        /* 主視覺區塊 */
         .main-layout {
             display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
+            grid-template-columns: 2fr 1.1fr;
+            gap: 25px;
         }
-        .chart-box {
-            position: relative;
-            background: #fff;
-            border: 1px solid #e2e8f0;
+        .chart-wrapper {
+            background: #ffffff;
+            border: 1px solid var(--border);
             border-radius: 8px;
-            padding: 10px;
+            padding: 15px;
+            min-height: 580px;
+            position: relative;
         }
-        .info-box {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+        .analysis-wrapper {
+            background: #ffffff;
+            border: 1px solid var(--border);
             border-radius: 8px;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            max-height: 610px;
+            overflow-y: auto;
         }
-        .info-box h3 {
-            color: var(--primary);
-            margin-top: 0;
-            border-bottom: 2px solid #e2e8f0;
+        .analysis-wrapper h3 {
+            margin: 0 0 15px 0;
+            font-size: 1.05rem;
+            color: var(--slate-700);
+            border-bottom: 2px solid var(--slate-100);
             padding-bottom: 8px;
         }
-        .similarity-list {
-            list-style: none;
-            padding: 0;
-            margin-top: 15px;
+        .vector-matrix-box {
+            background: var(--slate-100);
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-family: 'Courier New', Courier, monospace;
+            color: var(--slate-600);
+            margin-bottom: 15px;
+            line-height: 1.4;
         }
-        .similarity-list li {
+        .matrix-row {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px dashed #e2e8f0;
+            margin-bottom: 3px;
         }
-        .score {
+        .matrix-dim { color: #2563eb; font-weight: bold; }
+        .matrix-val { font-weight: bold; }
+
+        /* 排行榜樣式 */
+        .similarity-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .similarity-table th {
+            text-align: left;
+            padding: 8px;
+            background: var(--slate-100);
+            color: var(--slate-600);
+            font-weight: 600;
+        }
+        .similarity-table td {
+            padding: 9px 8px;
+            border-bottom: 1px solid var(--slate-100);
+        }
+        .similarity-table tr.highlight-row {
+            background-color: #f0fdf4;
+            font-weight: bold;
+            color: var(--teal-600);
+        }
+        .cosine-badge {
             font-family: monospace;
             font-weight: bold;
-            color: #0d9488;
+            background: #f0fdfa;
+            color: var(--teal-600);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #ccfbf1;
+        }
+        .checkbox-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+        .checkbox-container label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Word2Vec 2D 空間幾何與語意互動網頁</h1>
-    <p class="desc">利用高維詞向量降維至 2D 的模擬視覺化。點擊圖中單字可觀察相似度，或勾選顯示語意平行關係。</p>
+    <header>
+        <h1>Word2Vec圖形視覺化</h1>
+    </header>
 
-    <div class="control-panel">
-        <div>
-            <label for="searchWord">搜尋單字：</label>
-            <input type="text" id="searchWord" placeholder="例如：國王, 貓...">
-            <button onclick="searchWord()">搜尋</button>
+    <div class="dashboard-grid">
+        <div class="panel">
+            <h4>🔍 Vector Space Retrieval</h4>
+            <input type="text" id="searchWord" placeholder="輸入資料庫中詞彙定位..." style="margin-bottom: 10px;">
+            <button onclick="searchWord()">檢索目標向量</button>
         </div>
-        <div>
-            <input type="checkbox" id="showLines" onchange="toggleLines()">
-            <label for="showLines"><strong>顯示語意類比連線</strong> (國王-男人 vs 女王-女人)</label>
+
+        <div class="panel">
+            <h4>🧮 Linguistic Regularities (Linear Algebraic Operation)</h4>
+            <div class="algebra-flex">
+                <select id="algA"></select>
+                <span class="math-sign">－</span>
+                <select id="algB"></select>
+                <span class="math-sign">＋</span>
+                <select id="algC"></select>
+            </div>
+            <button onclick="calculateAnalogy()" style="background-color: var(--indigo-600);">執行向量線性代數運算 (A - B + C)</button>
+        </div>
+
+        <div class="panel">
+            <h4>⚙️ Geometric Visualizers</h4>
+            <div class="checkbox-container">
+                <label>
+                    <input type="checkbox" id="showAnalogylines" onchange="toggleLines()" checked>
+                    顯示潛在特徵維度對稱投影線 (Offset Subspaces)
+                </label>
+                <label>
+                    <input type="checkbox" id="showMathArrow" onchange="toggleLines()" checked>
+                    顯示動態代數運算向量位移軌跡 (Vector Trajectory)
+                </label>
+            </div>
         </div>
     </div>
 
     <div class="main-layout">
-        <div class="chart-box">
-            <canvas id="wordChart" style="width:100%; height:450px;"></canvas>
+        <div class="chart-wrapper">
+            <canvas id="wordChart"></canvas>
         </div>
 
-        <div class="info-box">
-            <h3 id="selected-title">點擊圖中單字</h3>
-            <p>與該詞在多維空間中的<strong>餘弦相似度 (Cosine Similarity)</strong> 排行：</p>
-            <ul id="similarity-results" class="similarity-list">
-                <li style="color: #94a3b8;">暫無資料，請點擊左側散佈圖節點</li>
-            </ul>
+        <div class="analysis-wrapper">
+            <h3 id="selected-title">Embedding Metrics Evaluation</h3>
+            <div id="vector-display" style="display: none;">
+                <div class="vector-matrix-box" id="vector-raw"></div>
+            </div>
+            <table class="similarity-table">
+                <thead>
+                    <tr>
+                        <th>Word Token</th>
+                        <th>Cosine Similarity ($\cos\theta$)</th>
+                    </tr>
+                </thead>
+                <tbody id="similarity-results-tbody">
+                    <tr>
+                        <td colspan="2" style="color: #94a3b8; text-align: center; padding-top: 20px;">等待高維度矩陣運算觸發...</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
 <script>
-// 1. 模擬 Word2Vec 資料（包含 2D 繪圖座標，與背後用於計算相似度的 4 維模擬主向量）
-const wordData = [
-    { word: "國王", x: 2,  y: 8,  vector: [0.9, 0.1, 0.8, 0.2], color: "#ef4444" },
-    { word: "女王", x: 4,  y: 9,  vector: [0.8, 0.2, 0.2, 0.9], color: "#ec4899" },
-    { word: "男人", x: 1.5,y: 4,  vector: [0.7, 0.1, 0.7, 0.1], color: "#3b82f6" },
-    { word: "女人", x: 3.5,y: 5,  vector: [0.6, 0.2, 0.1, 0.8], color: "#10b981" },
-    { word: "王子", x: 2.5,y: 7.2,vector: [0.85,0.15,0.75,0.25],color: "#f59e0b" },
-    { word: "公主", x: 4.5,y: 8.1,vector: [0.75,0.25,0.15,0.85],color: "#8b5cf6" },
-    { word: "貓",   x: 8,  y: 2,  vector: [0.1, 0.9, 0.3, 0.6], color: "#64748b" },
-    { word: "狗",   x: 9,  y: 1.5,vector: [0.15,0.85,0.4, 0.5], color: "#64748b" },
-    { word: "小丑", x: 6,  y: 5,  vector: [0.4, 0.5, 0.5, 0.5], color: "#64748b" }
+// 1. 8維分佈式特徵向量空間
+const rawWordData = [
+    // --- 性別與階級 ---
+    { word: "國王", vector: [0.95, 0.90, 0.05, 0.01, 0.05, 0.01, 0.00, 0.02], color: "#475569" },
+    { word: "女王", vector: [0.93, 0.05, 0.92, 0.01, 0.05, 0.01, 0.00, 0.02], color: "#e11d48" },
+    { word: "男人", vector: [0.02, 0.95, 0.02, 0.05, 0.05, 0.02, 0.00, 0.01], color: "#2563eb" },
+    { word: "女人", vector: [0.03, 0.02, 0.96, 0.05, 0.05, 0.02, 0.00, 0.01], color: "#16a34a" },
+    { word: "王子", vector: [0.78, 0.85, 0.06, 0.02, 0.05, 0.01, 0.00, 0.02], color: "#6366f1" },
+    { word: "公主", vector: [0.76, 0.04, 0.88, 0.02, 0.05, 0.01, 0.00, 0.02], color: "#db2777" },
+
+    // --- 時空地理與國家 ---
+    { word: "日本", vector: [0.10, 0.10, 0.10, 0.20, 0.95, 0.50, 0.02, 0.30], color: "#008080" },
+    { word: "東京", vector: [0.15, 0.10, 0.10, 0.10, 0.98, 0.65, 0.01, 0.35], color: "#20b2aa" },
+    { word: "美國", vector: [0.20, 0.10, 0.10, 0.15, 0.93, 0.85, 0.05, 0.45], color: "#4682b4" },
+    { word: "華盛頓",vector: [0.25, 0.20, 0.10, 0.10, 0.96, 0.88, 0.01, 0.20], color: "#2e8b57" },
+
+    // --- 科技巨頭與產品線 ---
+    { word: "蘋果", vector: [0.10, 0.05, 0.05, 0.15, 0.40, 0.96, 0.05, 0.25], color: "#a52a2a" },
+    { word: "iPhone",vector: [0.05, 0.02, 0.02, 0.01, 0.50, 0.98, 0.00, 0.00], color: "#cd5c5c" },
+    { word: "微軟", vector: [0.10, 0.10, 0.02, 0.01, 0.45, 0.95, 0.01, 0.02], color: "#8b008b" },
+    { word: "Windows",vector:[0.02, 0.05, 0.01, 0.00, 0.45, 0.97, 0.00, 0.00], color: "#9932cc" },
+
+    // --- 物質與科學代號 ---
+    { word: "黃金", vector: [0.40, 0.10, 0.10, 0.00, 0.20, 0.70, 0.00, 0.00], color: "#d4af37" },
+    { word: "Au",   vector: [0.38, 0.08, 0.08, 0.00, 0.18, 0.73, 0.00, 0.00], color: "#aa8c2c" },
+    { word: "銅",   vector: [0.05, 0.10, 0.10, 0.00, 0.20, 0.65, 0.00, 0.00], color: "#b87333" },
+    { word: "Cu",   vector: [0.04, 0.08, 0.08, 0.00, 0.19, 0.68, 0.00, 0.00], color: "#9c612b" },
+
+    // --- 生物、日常與飲食 ---
+    { word: "貓咪", vector: [0.01, 0.15, 0.15, 0.96, 0.10, 0.01, 0.00, 0.00], color: "#d97706" },
+    { word: "哈士奇",vector: [0.01, 0.35, 0.10, 0.97, 0.15, 0.02, 0.00, 0.02], color: "#708090" },
+    { word: "珍奶", vector: [0.02, 0.01, 0.05, 0.00, 0.30, 0.10, 0.96, 0.35], color: "#b45309" },
+    { word: "紅茶", vector: [0.01, 0.01, 0.02, 0.00, 0.25, 0.05, 0.93, 0.08], color: "#991b1b" },
+    { word: "披薩", vector: [0.02, 0.05, 0.01, 0.01, 0.35, 0.15, 0.02, 0.97], color: "#7c2d12" }
 ];
 
-// 2. 餘弦相似度計算函數 (Cosine Similarity)
+let wordData = []; 
+let chart;
+let mathArrowData = null;
+
+// 2. PCA 主成分分析降維演算法
+function computePCA(data) {
+    const matrix = data.map(d => d.vector);
+    const numRows = matrix.length;
+    const numCols = matrix[0].length;
+
+    const means = Array(numCols).fill(0);
+    for (let j = 0; j < numCols; j++) {
+        for (let i = 0; i < numRows; i++) means[j] += matrix[i][j];
+        means[j] /= numRows;
+    }
+    const centered = matrix.map(row => row.map((val, j) => val - means[j]));
+
+    function extractPrincipalComponent(matrixData, maxIter = 150) {
+        let vec = Array(numCols).fill(0).map(() => Math.random() - 0.5);
+        let norm = Math.sqrt(vec.reduce((sum, v) => sum + v*v, 0));
+        vec = vec.map(v => v / norm);
+
+        for (let iter = 0; iter < maxIter; iter++) {
+            let nextVec = Array(numCols).fill(0);
+            for (let i = 0; i < numRows; i++) {
+                let dot = 0;
+                for (let j = 0; j < numCols; j++) dot += matrixData[i][j] * vec[j];
+                for (let j = 0; j < numCols; j++) nextVec[j] += matrixData[i][j] * dot;
+            }
+            let nextNorm = Math.sqrt(nextVec.reduce((sum, v) => sum + v*v, 0));
+            if(nextNorm === 0) break;
+            vec = nextVec.map(v => v / nextNorm);
+        }
+        return vec;
+    }
+
+    const pc1 = extractPrincipalComponent(centered);
+    const residual = centered.map(row => {
+        let dot = row.reduce((sum, val, j) => sum + val * pc1[j], 0);
+        return row.map((val, j) => val - dot * pc1[j]);
+    });
+    const pc2 = extractPrincipalComponent(residual);
+
+    let projected = data.map((item, idx) => {
+        let x = centered[idx].reduce((sum, val, j) => sum + val * pc1[j], 0);
+        let y = centered[idx].reduce((sum, val, j) => sum + val * pc2[j], 0);
+        return { ...item, rawX: x, rawY: y };
+    });
+
+    const minX = Math.min(...projected.map(p => p.rawX));
+    const maxX = Math.max(...projected.map(p => p.rawX));
+    const minY = Math.min(...projected.map(p => p.rawY));
+    const maxY = Math.max(...projected.map(p => p.rawY));
+
+    return projected.map(p => ({
+        ...p,
+        x: 1.5 + ((p.rawX - minX) / (maxX - minX || 1)) * 9,
+        y: 1.5 + ((p.rawY - minY) / (maxY - minY || 1)) * 9
+    }));
+}
+
+// 3. 餘弦相似度計算
 function cosineSimilarity(vecA, vecB) {
-    let dotProduct = 0;
-    let normA = 0;
-    let normB = 0;
+    let dotProduct = 0, normA = 0, normB = 0;
     for (let i = 0; i < vecA.length; i++) {
         dotProduct += vecA[i] * vecB[i];
         normA += vecA[i] * vecA[i];
         normB += vecB[i] * vecB[i];
     }
+    if (normA === 0 || normB === 0) return 0;
     return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
-let chart;
-
-// 3. 初始化 Chart.js 散佈圖
+// 4. 初始化 Chart.js 圖表結構與幾何拓撲
 function initChart() {
     const ctx = document.getElementById('wordChart').getContext('2d');
     
@@ -181,62 +390,78 @@ function initChart() {
         type: 'scatter',
         data: {
             datasets: [{
-                label: '詞向量空間',
+                label: 'Latent Semantic Manifold Projection (PCA Plane)',
                 data: wordData.map(d => ({ x: d.x, y: d.y })),
                 backgroundColor: wordData.map(d => d.color),
                 pointRadius: 9,
-                pointHoverRadius: 12
+                pointHoverRadius: 12,
+                borderWidth: 1.5,
+                borderColor: '#ffffff'
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return wordData[context.dataIndex].word;
-                        }
-                    }
-                },
-                // 在畫布上直接繪製文字標籤與類比連線
-                afterDraw: (chart) => {} 
-            },
             scales: {
-                x: { min: 0, max: 11, title: { display: true, text: '降維特徵 X' } },
-                y: { min: 0, max: 11, title: { display: true, text: '降維特徵 Y' } }
+                x: { min: 0, max: 12, title: { display: true, text: 'Principal Component 1 (Eigenaxis 1)' }, grid: { color: '#f1f5f9' } },
+                y: { min: 0, max: 12, title: { display: true, text: 'Principal Component 2 (Eigenaxis 2)' }, grid: { color: '#f1f5f9' } }
             },
-            // 監聽點擊事件
+            plugins: {
+                legend: { display: false }
+            },
             onClick: (event, elements) => {
                 if (elements.length > 0) {
                     const index = elements[0].index;
-                    updateSimilarityUI(wordData[index]);
+                    mathArrowData = null;
+                    updateAnalysisUI(wordData[index].word, wordData[index].vector);
                 }
             }
         },
-        // 利用 Chart.js 套件外掛機制手動繪製文字與連線
         plugins: [{
-            id: 'customLabels',
+            id: 'academicGeometryEngine',
             afterDatasetsDraw(chart) {
                 const {ctx, scales: {x, y}} = chart;
                 ctx.save();
                 
-                // 畫文字標籤
                 wordData.forEach(d => {
-                    ctx.font = 'bold 14px sans-serif';
-                    ctx.fillStyle = '#1e293b';
-                    ctx.fillText(d.word, x.getPixelForValue(d.x) + 12, y.getPixelForValue(d.y) + 4);
+                    ctx.font = '500 12px sans-serif';
+                    ctx.fillStyle = '#475569';
+                    ctx.fillText(d.word, x.getPixelForValue(d.x) + 14, y.getPixelForValue(d.y) + 4);
                 });
 
-                // 如果勾選，畫出語意類比連線 (國王->男人, 女王->女人)
-                if (document.getElementById('showLines').checked) {
-                    ctx.lineWidth = 2;
-                    ctx.setLineDash([5, 5]);
+                if (document.getElementById('showAnalogylines').checked) {
+                    ctx.lineWidth = 1.2;
+                    ctx.setLineDash([4, 4]);
+                    drawVectorArrow(ctx, x, y, findWord("國王"), findWord("男人"), '#ef4444');
+                    drawVectorArrow(ctx, x, y, findWord("女王"), findWord("女人"), '#ec4899');
+                    drawVectorArrow(ctx, x, y, findWord("東京"), findWord("日本"), '#20b2aa');
+                    drawVectorArrow(ctx, x, y, findWord("華盛頓"), findWord("美國"), '#2e8b57');
+                    drawVectorArrow(ctx, x, y, findWord("蘋果"), findWord("iPhone"), '#a52a2a');
+                    drawVectorArrow(ctx, x, y, findWord("微軟"), findWord("Windows"), '#8b008b');
+                    drawVectorArrow(ctx, x, y, findWord("黃金"), findWord("Au"), '#d4af37');
+                    drawVectorArrow(ctx, x, y, findWord("銅"), findWord("Cu"), '#b87333');
+                }
+
+                if (document.getElementById('showMathArrow').checked && mathArrowData) {
+                    ctx.lineWidth = 2.5;
+                    ctx.setLineDash([]);
                     
-                    // 連線1：國王 到 男人
-                    drawLine(ctx, x, y, wordData[0], wordData[2], '#3b82f6');
-                    // 連線2：女王 到 女人
-                    drawLine(ctx, x, y, wordData[1], wordData[3], '#ec4899');
+                    drawVectorArrow(ctx, x, y, mathArrowData.ptA, mathArrowData.ptAMinusB, '#2563eb', true);
+                    drawVectorArrow(ctx, x, y, mathArrowData.ptAMinusB, mathArrowData.ptResult, '#10b981', true);
+
+                    const targetX = x.getPixelForValue(mathArrowData.ptResult.x);
+                    const targetY = y.getPixelForValue(mathArrowData.ptResult.y);
+                    ctx.beginPath();
+                    ctx.arc(targetX, targetY, 6, 0, 2 * Math.PI);
+                    ctx.fillStyle = '#1e293b';
+                    ctx.fill();
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                    
+                    ctx.font = 'bold 11px monospace';
+                    ctx.fillStyle = '#0f172a';
+                    ctx.fillText(" 🎯 Calculated Node (Theory)", targetX + 10, targetY - 6);
                 }
                 ctx.restore();
             }
@@ -244,66 +469,162 @@ function initChart() {
     });
 }
 
-function drawLine(ctx, scaleX, scaleY, pt1, pt2, color) {
+function drawVectorArrow(ctx, scaleX, scaleY, pt1, pt2, color, isDashed=false) {
+    if (!pt1 || !pt2) return;
+    const x1 = scaleX.getPixelForValue(pt1.x);
+    const y1 = scaleY.getPixelForValue(pt1.y);
+    const x2 = scaleX.getPixelForValue(pt2.x);
+    const y2 = scaleY.getPixelForValue(pt2.y);
+    
     ctx.beginPath();
     ctx.strokeStyle = color;
-    ctx.moveTo(scaleX.getPixelForValue(pt1.x), scaleY.getPixelForValue(pt1.y));
-    ctx.lineTo(scaleX.getPixelForValue(pt2.x), scaleY.getPixelForValue(pt2.y));
+    ctx.setLineDash(isDashed ? [3, 3] : []);
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
     ctx.stroke();
+
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.beginPath();
+    ctx.fillStyle = color;
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - 8 * Math.cos(angle - Math.PI / 6), y2 - 8 * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(x2 - 8 * Math.cos(angle + Math.PI / 6), y2 - 8 * Math.sin(angle + Math.PI / 6));
+    ctx.fill();
 }
 
-// 4. 計算並更新右側互動資訊欄
-function updateSimilarityUI(targetWordObj) {
-    document.getElementById('selected-title').innerText = `目前選取：${targetWordObj.word}`;
-    
-    // 計算與所有詞的相似度
-    const results = wordData.map(d => {
-        return {
-            word: d.word,
-            similarity: cosineSimilarity(targetWordObj.vector, d.vector)
-        };
-    });
+function findWord(name) {
+    return wordData.find(d => d.word === name);
+}
 
-    // 由高到低排序
+// 6. 更新計量分析面板 (Embedding Metrics)
+function updateAnalysisUI(titleText, targetVector, highlightWord = null) {
+    document.getElementById('selected-title').innerText = `Target: ${titleText}`;
+    const vecDisplay = document.getElementById('vector-display');
+    const vecRaw = document.getElementById('vector-raw');
+    vecDisplay.style.display = 'block';
+
+    const latentDimensions = [
+        "Royalty(皇室權力)", "Masculinity(陽性)", "Feminity(陰性)", "Biological(生物屬性)",
+        "Geography(地理歸屬)", "TechScience(抽象科技)", "Liquid(液態物質)", "SolidFood(固態食物)"
+    ];
+    let matrixHtml = `<div style='font-weight:bold; margin-bottom:6px; color:#334155;'>Distributed Feature Weights Matrix (8-Dimensions):</div>`;
+    targetVector.forEach((v, idx) => {
+        matrixHtml += `<div class="matrix-row">
+            <span class="matrix-dim">Dim ${idx+1} [${latentDimensions[idx]}]:</span>
+            <span class="matrix-val">${v.toFixed(4)}</span>
+        </div>`;
+    });
+    vecRaw.innerHTML = matrixHtml;
+
+    const results = wordData.map(d => ({
+        word: d.word,
+        similarity: cosineSimilarity(targetVector, d.vector)
+    }));
     results.sort((a, b) => b.similarity - a.similarity);
 
-    // 渲染至網頁上
-    const listContainer = document.getElementById('similarity-results');
-    listContainer.innerHTML = '';
+    const tbody = document.getElementById('similarity-results-tbody');
+    tbody.innerHTML = '';
     results.forEach(res => {
-        const li = document.createElement('li');
-        // 如果是自己，加粗變色
-        if(res.word === targetWordObj.word) {
-            li.style.fontWeight = 'bold';
-            li.style.color = 'var(--primary)';
+        const tr = document.createElement('tr');
+        if (res.word === highlightWord) {
+            tr.classList.add('highlight-row');
         }
-        li.innerHTML = `<span>${res.word}</span> <span class="score">${res.similarity.toFixed(4)}</span>`;
-        listContainer.appendChild(li);
+        tr.innerHTML = `
+            <td><strong>${res.word}</strong></td>
+            <td><span class="cosine-badge">${res.similarity.toFixed(5)}</span></td>
+        `;
+        tbody.appendChild(tr);
     });
 }
 
-// 5. 控制面板：顯示/隱藏連線
+// 7. 幾何代數運算核心： A - B + C
+function calculateAnalogy() {
+    const wordA = document.getElementById('algA').value;
+    const wordB = document.getElementById('algB').value;
+    const wordC = document.getElementById('algC').value;
+
+    const objA = wordData.find(d => d.word === wordA);
+    const objB = wordData.find(d => d.word === wordB);
+    const objC = wordData.find(d => d.word === wordC);
+
+    const resultVector = [];
+    for (let i = 0; i < objA.vector.length; i++) {
+        resultVector.push(objA.vector[i] - objB.vector[i] + objC.vector[i]);
+    }
+
+    const simulatedPtResult = {
+        x: objA.x - objB.x + objC.x,
+        y: objA.y - objB.y + objC.y
+    };
+    const simulatedPtAMinusB = {
+        x: objA.x - objB.x,
+        y: objA.y - objB.y
+    };
+
+    mathArrowData = {
+        ptA: objA,
+        ptAMinusB: simulatedPtAMinusB,
+        ptResult: simulatedPtResult
+    };
+
+    let bestWord = "";
+    let maxSim = -2;
+    wordData.forEach(d => {
+        if(d.word !== wordA && d.word !== wordC) {
+            let sim = cosineSimilarity(resultVector, d.vector);
+            if(sim > maxSim) {
+                maxSim = sim;
+                bestWord = d.word;
+            }
+        }
+    });
+
+    document.getElementById('showMathArrow').checked = true;
+    chart.update();
+
+    updateAnalysisUI(`[${wordA} - ${wordB} + ${wordC}]`, resultVector, bestWord);
+}
+
 function toggleLines() {
     chart.update();
 }
 
-// 6. 控制面板：搜尋功能
 function searchWord() {
     const input = document.getElementById('searchWord').value.trim();
     const foundIndex = wordData.findIndex(d => d.word === input);
     
     if (foundIndex !== -1) {
-        updateSimilarityUI(wordData[foundIndex]);
-        // 模擬 Chart.js 的 hover 效果高亮該點
+        mathArrowData = null;
+        updateAnalysisUI(wordData[foundIndex].word, wordData[foundIndex].vector);
         chart.setActiveElements([{ datasetIndex: 0, index: foundIndex }]);
         chart.update();
     } else {
-        alert("找不到該單字！請試試看：國王、女王、男人、女人、貓、狗");
+        alert("查詢詞彙不存於目前的模擬詞典（Vocabulary）中！");
     }
 }
 
-// 啟動
-window.onload = initChart;
+function initSelectors() {
+    const selectors = ['algA', 'algB', 'algC'];
+    selectors.forEach(id => {
+        const el = document.getElementById(id);
+        rawWordData.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.word;
+            opt.innerText = d.word;
+            el.appendChild(opt);
+        });
+    });
+    
+    document.getElementById('algA').value = "東京";
+    document.getElementById('algB').value = "日本";
+    document.getElementById('algC').value = "美國";
+}
+
+window.onload = () => {
+    wordData = computePCA(rawWordData);
+    initSelectors();
+    initChart();
+};
 </script>
 
 </body>
